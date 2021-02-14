@@ -39,7 +39,7 @@ COPY ./webapp.war /usr/local/tomcat/webapps
 
 Enable the password based authentication
 ```
-vi /etc/ssh/ssh_config
+vi /etc/ssh/sshd_config
  Comment the passwordauthentication line
  sudo service sshd restart
  ```
