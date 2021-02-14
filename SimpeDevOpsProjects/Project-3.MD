@@ -12,10 +12,19 @@
 
 3. create a new user for Docker management and add him to Docker (default) group
 ```sh
-useradd dockeradmin
-passwd dockeradmin
-usermod -aG docker dockeradmin
+sudo useradd dockeradmin
+sudo passwd dockeradmin
+sudo usermod -aG docker dockeradmin
 ```
+You would need to loog out and log back in so that your group membership is re-evaluated or type the following command:
+```
+su -s dockeradmin
+```
+Verify that you can run docker commands without sudo.
+```
+docker run hello-world
+```
+
 
 4. Write a Docker file under /opt/docker
 
