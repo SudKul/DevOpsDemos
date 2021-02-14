@@ -5,6 +5,7 @@
 
 2. Install docker on EC2 instance and start services 
   ```sh 
+  sudo su -
   yum install docker
   service docker start
   ```
@@ -19,8 +20,12 @@ usermod -aG docker dockeradmin
 4. Write a Docker file under /opt/docker
 
 ```sh
-mkdir /opt/docker
+cd /opt
+mkdir docker
+cd docker
+```
 
+```bash
 ### vi Dockerfile
 # Pull base image 
 From tomcat:8-jre8 
@@ -30,6 +35,17 @@ MAINTAINER "valaxytech"
 
 # copy war file on to container 
 COPY ./webapp.war /usr/local/tomcat/webapps
+```
+
+Enable the password based authentication
+```
+vi /etc/ssh/ssh_config
+ Comment the passwordauthentication line
+ sudo service sshd restart
+ ```
+Change ownership permissions. Allow the new user to write here
+```bash
+ chown -R dockeradmin:dockeradmin /opt/docker/
 ```
 
 5. Login to Jenkins console and add Docker server to execute commands from Jenkins  
