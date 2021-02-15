@@ -89,7 +89,7 @@ Create mySecondJob (Type: Maven project)
  
 3. **Post Steps**
 Add post-build steps: Choose "Send files or execute commands over SSH"
- Name: Host_2 
+ Name: Host_2 (Choose Verbose mode)
  Source files	: `webapp/target/*.war`
  Remove prefix	: `webapp/target`
  Remote directory	: `//opt//docker`  
@@ -104,7 +104,7 @@ docker stop demo_image;  docker rm -f demo_image; docker image rm -f demo_image;
   docker run -d --name demo_container -p 8888:8080 demo_image
   ```  
 
-#### 7. Login to Docker host and check images and containers. (no images and containers)
+### 7. Login to Docker host and check images and containers. (no images and containers)
 
 ### 8. Execute Jenkins job
 
