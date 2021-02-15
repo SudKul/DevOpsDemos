@@ -1,22 +1,35 @@
 ## Simple DevOps Project -3 
 
 
-1. Launch an EC2 instance for Docker host
 
-2. Install docker on EC2 instance and start services 
-  ```sh 
-  sudo su -
-  yum install docker
-  service docker start
-  ```
+### 1. Launch an EC2 instance for Docker host
 
-3. create a new user for Docker management and add him to Docker (default) group
-```sh
-sudo useradd dockeradmin
-sudo passwd dockeradmin
-sudo usermod -aG docker dockeradmin
+### 2. Install docker on EC2 instance 
+```sh 
+# update the existing packages
+sudo yum update
+sudo  yum install docker
 ```
-You would need to loog out and log back in so that your group membership is re-evaluated or type the following command:
+
+### 3. Create a new user for Docker management, and add that user to Docker (default) group. 
+```sh
+sudo useradd host2admin
+sudo passwd host2admin
+# Add the host2admin user to the "docker" user group 
+sudo usermod -aG docker host2admin
+# Add the $USER user to the "docker" user group. The current $USER is ec2-user
+sudo usermod -a -G docker $USER
+sudo reboot
+```
+### Start services 
+```bash
+# Reconnect using SSH. The public IP will cahnge after reboot
+sudo service docker start
+```
+
+
+##### Optional
+You would need to log out and log back in using SSH so that your group membership is re-evaluated or type the following command:
 ```
 su -s dockeradmin
 ```
@@ -26,21 +39,22 @@ docker run hello-world
 ```
 
 
-4. Write a Docker file under /opt/docker
+### 4. Write a Docker file under /opt/docker
 
-```sh
+```bash
+sudo su -
 cd /opt
 mkdir docker
 cd docker
+vi Dockerfile
 ```
 
-```bash
-### vi Dockerfile
+```sh
 # Pull base image 
 From tomcat:8-jre8 
 
 # Maintainer
-MAINTAINER "valaxytech" 
+MAINTAINER "Udacity" 
 
 # copy war file on to container 
 COPY ./webapp.war /usr/local/tomcat/webapps
@@ -49,52 +63,55 @@ COPY ./webapp.war /usr/local/tomcat/webapps
 Enable the password based authentication
 ```
 vi /etc/ssh/sshd_config
- Comment the passwordauthentication line
+# Comment the passwordauthentication line
  sudo service sshd restart
  ```
 Change ownership permissions. Allow the new user to write here
 ```bash
- chown -R dockeradmin:dockeradmin /opt/docker/
+ chown -R host2admin:host2admin /opt/docker/
+ sudo service docker restart
 ```
 
-5. Login to Jenkins console and add Docker server to execute commands from Jenkins  
-Manage Jenkins --> Configure system -->  Publish over SSH --> add Docker server and credentials
+### 5. Login to Jenkins console and add Docker server to execute commands from Jenkins  
+* Manage Jenkins --> Manager plugins --> Install "Publish over SSH" plugin
+* Manage Jenkins --> Configure system -->  Publish over SSH --> add Docker server and credentials
 
-6. Create Jenkins job 
+### 6. Create Jenkins job 
+Create mySecondJob (Type: Maven project)
 
-A) Source Code Management  
+1. **Source Code Management**
  Repository : https://github.com/ValaxyTech/hello-world.git  
  Branches to build : */master  
 
-B) Build
+2. **Build**
  Root POM: pom.xml  
  Goals and options : clean install package  
  
-C) send files or execute commands over SSH
- Name: docker_host  
+3. **Post Steps**
+Add post-build steps: Choose "Send files or execute commands over SSH"
+ Name: Host_2 
  Source files	: `webapp/target/*.war`
  Remove prefix	: `webapp/target`
  Remote directory	: `//opt//docker`  
  Exec command[s]	: 
-  ```sh
-  docker stop valaxy_demo;
-  docker rm -f valaxy_demo;
-  docker image rm -f valaxy_demo;
-  cd /opt/docker;
-  docker build -t valaxy_demo .
-  ```
-
-D) send files or execute commands over SSH  
-  Name: `docker_host`  
-  Exec command	: `docker run -d --name valaxy_demo -p 8090:8080 valaxy_demo`  
-
-7. Login to Docker host and check images and containers. (no images and containers)
-
-8. Execute Jenkins job
-
-9. check images and containers again on Docker host. This time an image and container get creates through Jenkins job
-
-10. Access web application from browser which is running on container
+```sh
+docker stop demo_image;  docker rm -f demo_image; docker image rm -f demo_image; cd /opt/docker; docker build -t demo_image .
 ```
-<docker_host_Public_IP>:8090
+**Add a Transfer Set**<br>
+
+  Exec command	: 
+  ```
+  docker run -d --name demo_container -p 8888:8080 demo_image
+  ```  
+
+#### 7. Login to Docker host and check images and containers. (no images and containers)
+
+### 8. Execute Jenkins job
+
+### 9. Check images and containers again on Docker host. 
+This time an image, **demo_image** and a container, **demo_container** will get created through Jenkins job
+
+### 10. Access web application from browser which is running on container
+```
+<docker_host_Public_IP>:8888
 ```
